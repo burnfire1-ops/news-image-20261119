@@ -1,14 +1,18 @@
-// news-image-20261119, v2 regrouped — 50 stories in one image.
+// news-image-20261119, v3 — 54 stories in one image.
 // Node 22, standard library only. The finished artwork is entry.png
 // beside this file; this program copies it byte-for-byte into the
-// output directory (/output, or MAKEFUN_OUTPUT_DIR when set).
-// v2 = v1 with the world-map pins regrouped by region: Asia 11-18,
-// Europe 19-27, Middle East 28-30, Americas 31-42, Africa 43-45,
-// Oceania 46-49, Global 50 (mRNA vaccine). Hero: first Trump-Xi-Putin
-// summit in Shenzhen. 9 grid cards with color-block illustrations
-// (326x50 strips). 49 map pins, 0 leader-line crossings, 3-column
-// index, UTC timeline, date-check box. Total 1015/1024. The gate
-// takes a whole PNG or JPEG of at most 1 MiB, 1024x1024 px.
+// output directory (/output, or MAKEFUN_OUTPUT_DIR when set), together
+// with the 16 source illustrations it was composed from.
+// v3 = Round 2: 4 hero + 12 Tier A + 38 brief = 54 stories.
+// Hero: Trilateral Summit in Shenzhen, Anthropic IPO, ICJ Myanmar
+// genocide ruling, Ebola in DRC. Tier A (12): Gaza tanks, Gemini 4
+// Neon, S&P 500, COP31, UK drones, Riyadh missile, Trump–Nvidia,
+// Alipay, Walmart, mRNA vaccine, Novltex, San Pedro Bay strike.
+// World map with 54 numbered pins (4 hero + 12 Tier A + 38 brief);
+// brief pins grouped by region (Asia 8, Europe 9, Middle East 3,
+// Americas 11, Africa 4, Oceania 3), 0 leader-line crossings,
+// 3-column index, UTC timeline, date-check box. Total 1022/1024.
+// The gate takes a whole PNG or JPEG of at most 1 MiB, 1024x1024 px.
 
 import { copyFileSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
@@ -16,6 +20,37 @@ import { join } from "node:path";
 const outDir = process.env.MAKEFUN_OUTPUT_DIR ?? "/output";
 const artwork = new URL("./entry.png", import.meta.url);
 const dest = join(outDir, "entry.png");
+
+const illustrations = [
+  "hero1-summit.png",
+  "hero2-anthropic.png",
+  "hero3-icj.png",
+  "hero4-ebola.png",
+  "strip05-gaza.png",
+  "strip06-gemini.png",
+  "strip07-sp500.png",
+  "cop31-unchanged.png",
+  "strip09-drones.png",
+  "strip10-riyadh.png",
+  "strip11-trump-nvidia.png",
+  "strip12-alipay.png",
+  "strip13-walmart.png",
+  "strip14-mrna.png",
+  "strip15-novltex.png",
+  "strip16-sanpedro.png",
+];
+
+for (const name of illustrations) {
+  const src = new URL(`./${name}`, import.meta.url);
+  const dst = join(outDir, name);
+  copyFileSync(src, dst);
+  // Verify each illustration copy: size must match the source.
+  const s = statSync(src).size;
+  const d = statSync(dst).size;
+  if (d !== s) {
+    throw new Error(`${name} copy size mismatch: ${d} != ${s}`);
+  }
+}
 
 copyFileSync(artwork, dest);
 
@@ -39,3 +74,5 @@ if (width !== 1024 || height !== 1024) {
   throw new Error(`entry.png dimensions ${width}x${height}, expected 1024x1024`);
 }
 console.log(`entry.png copied OK (${dstSize} bytes, ${width}x${height}) -> ${dest}`);
+console.log(`illustrations copied OK (${illustrations.length} files, sizes verified) -> ${outDir}`);
+console.log(`total files written: ${illustrations.length + 1} (entry.png + ${illustrations.length} illustrations)`);
